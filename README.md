@@ -16,10 +16,9 @@ sudo dnf install podman -y
 Build and run container image from root directory of the project:
 
 ```bash
-mkdir -p $(pwd)/tn_devops/nexus/
-
-# To be able to use volume from host, 200 is UID of nexus user
-sudo chown 200:200 -R $(pwd)/tn_devops/nexus/
+sudo mkdir -p /tn_devops/nexus
+sudo chown $USER:$USER -R /tn_devops
+podman unshare chown 200:200 -R /tn_devops
 
 # Build the image from Dockerfile
 ./build_image.sh
@@ -29,9 +28,14 @@ sudo chown 200:200 -R $(pwd)/tn_devops/nexus/
 
 # Initial password for the admin user
 cat $(pwd)/tn_devops/nexus/nexus3/admin.password
+
+# Run container at startup of Rocky Linux
+podman generate systemd --name nexus > nexus.service
+sudo mv nexus.service /usr/lib/systemd/system/nexus.service
+systemctl enable nexus
 ```
 
 After going through all of the steps you should have your containerized instance up and running.
-Now you can login at http://localhost:18081/nexus/ with username "admin" and the inital password 
-that we found in the previous code block.
+Login at http://localhost:18081/nexus/ with username "admin" and the inital password
+that we found in the code block above, after that amin.password file is deleted.
 
